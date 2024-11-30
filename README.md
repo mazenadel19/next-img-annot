@@ -1,4 +1,4 @@
-# Task Management and Image Annotation App
+## Task Management and Image Annotation App
 
 This is a task management app that enables users to create, assign, and manage tasks with image annotations. The app is designed for a broad audience, offering simple yet powerful task organization features.
 
@@ -73,3 +73,106 @@ Access the production site: [next-fsbuilder.vercel.app](https://next-fsbuilder.v
 
 -   The app cannot fully operate locally due to the Imgur API's HTTPS requirement for image uploads.
 -   Ensure the Firebase Firestore rules allow read/write access for your app setup.
+
+---
+
+## 📂 Database Structure
+
+The app uses **Firebase Firestore** for managing users, tasks, and annotations. Below is an overview of the database collections and document structures:
+
+### Users Collection
+
+Each document in the `users` collection represents a single user.
+
+**Document Structure:**
+
+```typescript
+export interface User {
+    id: string // Unique user identifier (user's UID)
+    email: string // User's email address
+    createdAt: string // Account creation timestamp
+    tasks: string[] // Array of task IDs assigned to the user
+}
+```
+
+-   **`id`**: The unique identifier for the user (Firebase UID).
+-   **`email`**: User's email address.
+-   **`createdAt`**: Timestamp when the user account was created.
+-   **`tasks`**: An array containing the IDs of tasks assigned to the user.
+
+### Tasks Collection
+
+Each document in the `tasks` collection represents a single task that can be annotated by a user.
+
+**Document Structure:**
+
+```typescript
+export interface Task {
+    id?: string // Unique task identifier (task's document ID)
+    createdAt: string // Task creation timestamp
+    imageURL: string // URL of the image associated with the task
+    description: string // Brief description of the task
+    assignedTo: string // UID of the user assigned to the task
+    status: 'Pending' | 'InProgress' | 'Completed' // Task status
+    annotations: [
+        {
+            rectangles: {
+                // Array of rectangles drawn by the user
+                x: number // X-coordinate of the rectangle
+                y: number // Y-coordinate of the rectangle
+                width: number // Width of the rectangle
+                height: number // Height of the rectangle
+            }[]
+            annotation: string // Text annotation for the rectangle
+        },
+    ]
+}
+```
+
+-   **`id`**: The unique identifier for the task (Firebase document ID).
+-   **`createdAt`**: Timestamp when the task was created.
+-   **`imageURL`**: URL of the image associated with the task.
+-   **`description`**: A brief description of the task.
+-   **`assignedTo`**: The user ID (UID) of the person assigned to this task.
+-   **`status`**: The current status of the task, which can be 'Pending', 'InProgress', or 'Completed'.
+-   **`annotations`**: An array of annotations, where each annotation contains:
+    -   **`rectangles`**: An array of objects representing the coordinates and dimensions of rectangles drawn by the user on the image.
+    -   **`annotation`**: A text description associated with the rectangle.
+
+---
+
+## 🔐 Firebase Security Rules
+
+The following rules are applied to ensure proper access control for the app:
+
+### Users Collection
+
+```javascript
+match /users/{userId} {
+    allow read: if request.auth != null; // Only authenticated users can read their own data
+    allow write: if request.auth != null && request.auth.uid == userId; // Only users can write their own data
+}
+```
+
+-   **`read`**: Only authenticated users can read their own user data.
+-   **`write`**: Only authenticated users can write to their own user data.
+
+### Tasks Collection
+
+```javascript
+match /tasks/{taskId} {
+    allow read: if request.auth.uid == resource.data.assignedTo; // Users can read only their assigned tasks
+    allow write: if request.auth != null; // Any authenticated user can create tasks
+}
+```
+
+-   **`read`**: Only the user assigned to the task can read the task's details.
+-   **`write`**: Any authenticated user can create tasks, but only the assigned user can modify them.
+
+---
+
+## 📋 Assumptions
+
+-   The user authentication is handled through Firebase, and users must be logged in to interact with tasks and annotations.
+-   Image upload functionality relies on the Imgur API due to cost constraints. This decision is made to avoid using Firebase Storage, which could incur additional costs.
+-   The app is designed for desktop and mobile compatibility, but users should ensure a secure HTTPS connection for image upload functionality.

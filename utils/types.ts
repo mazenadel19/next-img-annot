@@ -2,6 +2,7 @@ export interface User {
     id: string
     email: string
     createdAt: string
+    tasks: string[]
 }
 
 export interface Task {
