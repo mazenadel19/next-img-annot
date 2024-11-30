@@ -1,9 +1,24 @@
-import { arrayUnion, collection, doc, getDocs, writeBatch } from 'firebase/firestore'
+import {
+    arrayUnion,
+    collection,
+    doc,
+    DocumentData,
+    getDocs,
+    limit,
+    orderBy,
+    query,
+    QueryDocumentSnapshot,
+    startAfter,
+    where,
+    writeBatch,
+} from 'firebase/firestore'
 import { db } from './firebase'
 import { Task, User } from './types'
+import { DOCUMENTS_LIMIT } from '@/app/constants'
 
+// NOTE: before using the seeder you need to remove writing restrictions on the collections
 export const tasksSeeder = async () => {
-    const tasksRef = collection(db, 'tasks')
+    const tasksRef = collection(db, 'tasks') // Reference to tasks collection
     const usersRef = collection(db, 'users') // Reference to users collection
     const batch = writeBatch(db) // Create a write batch
 
@@ -51,4 +66,29 @@ export const fetchUsers = async () => {
         id: doc.id,
         ...doc.data(),
     })) as User[]
+}
+
+export const fetchTasks = async (
+    status: Task['status'],
+    userId: string,
+    lastDoc: QueryDocumentSnapshot<DocumentData> | null
+) => {
+    const tasksQuery = query(
+        collection(db, 'tasks'),
+        where('assignedTo', '==', userId),
+        where('status', '==', status),
+        orderBy('status'),
+        ...(lastDoc ? [startAfter(lastDoc)] : []),
+        limit(DOCUMENTS_LIMIT)
+    )
+
+    const snapshot = await getDocs(tasksQuery)
+    const tasks = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+    })) as Task[]
+
+    const nextLastDoc = snapshot.docs.length < DOCUMENTS_LIMIT ? null : snapshot.docs[snapshot.docs.length - 1]
+
+    return { tasks, nextLastDoc }
 }

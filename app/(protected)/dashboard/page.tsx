@@ -1,93 +1,56 @@
 'use client'
 import ProtectedRoute from '@/components/protected-route'
 import { useAuth } from '@/providers/context/auth-context'
-import { db } from '@/utils/firebase'
-// import { createBulkDummyTasks } from '@/utils/helper'
+import { fetchTasks } from '@/utils/helper'
 import { Task } from '@/utils/types'
 import { Box, Button, CircularProgress, Container, Typography } from '@mui/material'
-import {
-    collection,
-    DocumentData,
-    getDocs,
-    limit,
-    orderBy,
-    query,
-    QueryDocumentSnapshot,
-    startAfter,
-    where,
-} from 'firebase/firestore'
+import { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 const Dashboard = () => {
     const [tasks, setTasks] = useState<Task[]>([])
     const [loading, setLoading] = useState(false)
     const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<DocumentData, DocumentData> | null>(null) // Track the last document for pagination
-    const [statusFilter, setStatusFilter] = useState<Task['status']>('Pending') // Set status filter for fetching tasks
+    const [statusFilter, setStatusFilter] = useState<Task['status']>('Pending')
     const { user } = useAuth()
 
     const loadMoreTasks = async () => {
-        if (!lastDoc) {
+        if (!lastDoc || !user?.uid) {
             return
         }
 
         setLoading(true)
         try {
-            const tasksQuery = query(
-                collection(db, 'tasks'),
-                where('assignedTo', '==', user?.uid),
-                where('status', '==', statusFilter),
-                orderBy('status'),
-                startAfter(lastDoc),
-                limit(10)
-            )
-
-            const snapshot = await getDocs(tasksQuery)
-            const newTasks = snapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            })) as Task[]
-
+            const { tasks: newTasks, nextLastDoc } = await fetchTasks(statusFilter, user?.uid, lastDoc)
             setTasks((prevTasks) => [...prevTasks, ...newTasks])
-            setLastDoc(snapshot.docs[snapshot.docs.length - 1]) // Update the last document for pagination
-            setLoading(false)
+            setLastDoc(nextLastDoc)
         } catch (error) {
-            console.error('Error fetching more tasks:', error)
+            console.error('Error loading more tasks:', error)
+        } finally {
             setLoading(false)
         }
     }
 
     useEffect(() => {
-        if (!user?.uid || !statusFilter) {
+        if (!user?.uid) {
             return
         }
 
-        // Fetch tasks based on user and status
-        const fetchTasks = async () => {
+        const fetchInitialTasks = async () => {
             setLoading(true)
             try {
-                const tasksQuery = query(
-                    collection(db, 'tasks'),
-                    where('assignedTo', '==', user?.uid),
-                    where('status', '==', statusFilter),
-                    orderBy('status'),
-                    limit(10)
-                )
-
-                const snapshot = await getDocs(tasksQuery)
-                const newTasks = snapshot.docs.map((doc) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                })) as Task[]
-
-                setTasks(newTasks)
-                setLastDoc(snapshot.docs[snapshot.docs.length - 1]) // Set the last document for pagination
-                setLoading(false)
+                const { tasks: fetchedTasks, nextLastDoc } = await fetchTasks(statusFilter, user.uid, null)
+                setTasks(fetchedTasks)
+                setLastDoc(nextLastDoc)
             } catch (error) {
                 console.error('Error fetching tasks:', error)
+            } finally {
                 setLoading(false)
             }
         }
-        fetchTasks() // Initially load tasks
+
+        fetchInitialTasks()
     }, [statusFilter, user?.uid])
 
     return (
@@ -105,7 +68,7 @@ const Dashboard = () => {
                     Dashboard
                 </Typography>
 
-                <Box sx={{ mb: 2 }}>
+                <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
                     <Button variant="contained" onClick={() => setStatusFilter('Pending')}>
                         Pending
                     </Button>
@@ -124,18 +87,46 @@ const Dashboard = () => {
                         {tasks.map((task) => (
                             <Box
                                 key={task.id}
-                                sx={{ borderBottom: '1px solid #ccc', paddingBottom: 2, marginBottom: 2 }}
+                                sx={{
+                                    border: '1px solid #ddd',
+                                    borderRadius: '8px',
+                                    padding: 2,
+                                    marginBottom: 2,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    backgroundColor: '#f9f9f9',
+                                    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+                                }}
                             >
-                                <Typography variant="h6">{task.description}</Typography>
-                                <Typography>Status: {task.status}</Typography>
+                                <Box>
+                                    <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#333' }}>
+                                        {task.description}
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: '#555' }}>
+                                        Status: <strong>{task.status}</strong>
+                                    </Typography>
+                                </Box>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    component={Link}
+                                    href={`/dashboard/${task.id}`}
+                                    sx={{
+                                        whiteSpace: 'nowrap',
+                                        textTransform: 'none',
+                                    }}
+                                >
+                                    View Annotations
+                                </Button>
                             </Box>
                         ))}
-                        {tasks.length > 0 && lastDoc && (
-                            <Button onClick={loadMoreTasks} variant="outlined">
-                                Load More
-                            </Button>
-                        )}
                     </>
+                )}
+                {tasks.length > 0 && lastDoc && (
+                    <Button onClick={loadMoreTasks} variant="outlined" disabled={loading}>
+                        {loading ? 'Loading...' : 'Load More'}
+                    </Button>
                 )}
             </Container>
         </ProtectedRoute>
