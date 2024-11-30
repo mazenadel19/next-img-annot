@@ -1,9 +1,10 @@
 'use client'
-import { auth } from '@/utils/firebase'
+import { auth, db } from '@/utils/firebase'
 import { Box, Button, Container, TextField, Typography } from '@mui/material'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
+import { doc, setDoc } from 'firebase/firestore'
 
 export default function AuthPage() {
     const [isLogin, setIsLogin] = useState(true)
@@ -22,7 +23,14 @@ export default function AuthPage() {
             if (isLogin) {
                 await signInWithEmailAndPassword(auth, email, password)
             } else {
-                await createUserWithEmailAndPassword(auth, email, password)
+                const userCred = await createUserWithEmailAndPassword(auth, email, password)
+                const { user } = userCred
+                const userRef = doc(db, 'users', user.uid)
+                await setDoc(userRef, {
+                    email: user.email,
+                    createdAt: new Date().toISOString(),
+                    tasks: [],
+                })
             }
             router.replace('/dashboard')
         } catch (error) {
