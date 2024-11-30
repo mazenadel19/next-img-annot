@@ -1,9 +1,10 @@
 'use client'
 import ProtectedRoute from '@/components/protected-route'
 import { db } from '@/utils/firebase'
-import { user } from '@/utils/types'
+import { fetchUsers } from '@/utils/helper'
+import { Task, User } from '@/utils/types'
 import { Box, Button, CircularProgress, Container, MenuItem, TextField, Typography } from '@mui/material'
-import { addDoc, arrayUnion, collection, doc, getDocs, updateDoc } from 'firebase/firestore'
+import { addDoc, arrayUnion, collection, doc, updateDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
@@ -12,7 +13,7 @@ export default function NewTaskForm() {
     const [assignedTo, setAssignedTo] = useState('')
     const [image, setImage] = useState<File | null>(null)
     const [loading, setLoading] = useState(false)
-    const [users, setUsers] = useState<user[]>([])
+    const [users, setUsers] = useState<User[]>([])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -46,12 +47,13 @@ export default function NewTaskForm() {
             if (data.success) {
                 const imageURL = data.data.link
 
-                const taskDoc = {
+                const taskDoc: Task = {
                     imageURL: imageURL,
                     description,
                     assignedTo: assignedTo,
                     status: 'Pending',
                     annotations: [],
+                    createdAt: new Date().toISOString(),
                 }
 
                 // Save task to Firestore
@@ -96,16 +98,9 @@ export default function NewTaskForm() {
     }
 
     useEffect(() => {
-        const fetchUsers = async () => {
-            const usersSnapshot = await getDocs(collection(db, 'users'))
-            const usersList = usersSnapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            })) as user[]
-            setUsers(usersList)
-        }
-
-        fetchUsers().catch((error) => console.error('Error fetching users:', error))
+        fetchUsers()
+            .then((users) => setUsers(users))
+            .catch((error) => console.error('Error fetching users:', error))
     }, [])
 
     return (
