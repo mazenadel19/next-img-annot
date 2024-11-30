@@ -114,18 +114,16 @@ export interface Task {
     description: string // Brief description of the task
     assignedTo: string // UID of the user assigned to the task
     status: 'Pending' | 'InProgress' | 'Completed' // Task status
-    annotations: [
-        {
-            rectangles: {
-                // Array of rectangles drawn by the user
-                x: number // X-coordinate of the rectangle
-                y: number // Y-coordinate of the rectangle
-                width: number // Width of the rectangle
-                height: number // Height of the rectangle
-            }[]
-            annotation: string // Text annotation for the rectangle
-        },
-    ]
+    annotations: {
+        rectangles: {
+            // Array of rectangles drawn by the user
+            x: number // X-coordinate of the rectangle
+            y: number // Y-coordinate of the rectangle
+            width: number // Width of the rectangle
+            height: number // Height of the rectangle
+        }[]
+        annotation: string // Text annotation for the rectangle
+    }[]
 }
 ```
 

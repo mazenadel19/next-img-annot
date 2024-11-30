@@ -14,15 +14,13 @@ export interface Task {
     status: 'Pending' | 'InProgress' | 'Completed'
     annotations:
         | []
-        | [
-              {
-                  rectangles: {
-                      x: number
-                      y: number
-                      width: number
-                      height: number
-                  }[]
-                  annotation: string
-              },
-          ]
+        | {
+              rectangles: {
+                  x: number
+                  y: number
+                  width: number
+                  height: number
+              }[]
+              annotation: string
+          }[]
 }
