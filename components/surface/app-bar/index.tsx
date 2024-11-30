@@ -32,8 +32,8 @@ export default function ButtonAppBar() {
     }
 
     useEffect(() => {
-        if (!loading) {
-            router.replace(user ? '/dashboard' : '/auth')
+        if (!loading && !user) {
+            router.replace('/auth')
         }
     }, [user, loading, router])
 

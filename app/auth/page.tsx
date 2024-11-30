@@ -3,14 +3,16 @@ import { auth, db } from '@/utils/firebase'
 import { Box, Button, Container, TextField, Typography } from '@mui/material'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 import { useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { doc, setDoc } from 'firebase/firestore'
+import { useAuth } from '@/providers/context/auth-context'
 
 export default function AuthPage() {
     const [isLogin, setIsLogin] = useState(true)
     const [email, setEmail] = useState<null | string>(null)
     const [password, setPassword] = useState<null | string>(null)
     const [error, setError] = useState('')
+    const { user, loading } = useAuth()
     const router = useRouter()
 
     async function handleSubmit(e: React.FormEvent) {
@@ -37,6 +39,13 @@ export default function AuthPage() {
             setError((error as Error).message)
         }
     }
+
+    useEffect(() => {
+        if (!loading && user) {
+            router.replace('/dashboard')
+        }
+    }, [user, loading, router])
+
     return (
         <Container
             maxWidth="sm"
