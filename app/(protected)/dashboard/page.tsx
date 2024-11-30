@@ -7,6 +7,7 @@ import { Box, Button, CircularProgress, Container, Typography } from '@mui/mater
 import { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 
 const Dashboard = () => {
     const [tasks, setTasks] = useState<Task[]>([])
@@ -27,6 +28,12 @@ const Dashboard = () => {
             setLastDoc(nextLastDoc)
         } catch (error) {
             console.error('Error loading more tasks:', error)
+            toast.error('Error loading more tasks: ' + (error as Error).message, {
+                ariaProps: {
+                    role: 'alert',
+                    'aria-live': 'assertive',
+                },
+            })
         } finally {
             setLoading(false)
         }
@@ -45,6 +52,12 @@ const Dashboard = () => {
                 setLastDoc(nextLastDoc)
             } catch (error) {
                 console.error('Error fetching tasks:', error)
+                toast.error('Error fetching tasks: ' + (error as Error).message, {
+                    ariaProps: {
+                        role: 'alert',
+                        'aria-live': 'assertive',
+                    },
+                })
             } finally {
                 setLoading(false)
             }

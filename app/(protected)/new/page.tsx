@@ -100,7 +100,15 @@ export default function NewTaskForm() {
     useEffect(() => {
         fetchUsers()
             .then((users) => setUsers(users))
-            .catch((error) => console.error('Error fetching users:', error))
+            .catch((error) => {
+                console.error('Error fetching users:', error)
+                toast.error('Error fetching users: ' + (error as Error).message, {
+                    ariaProps: {
+                        role: 'alert',
+                        'aria-live': 'assertive',
+                    },
+                })
+            })
     }, [])
 
     return (
