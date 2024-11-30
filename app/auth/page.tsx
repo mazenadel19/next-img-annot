@@ -1,11 +1,12 @@
 'use client'
 import { auth } from '@/utils/firebase'
-import { Box, Button, Container, Link, TextField, Typography } from '@mui/material'
-import { signInWithEmailAndPassword } from 'firebase/auth'
+import { Box, Button, Container, TextField, Typography } from '@mui/material'
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 
-export default function Login() {
+export default function AuthPage() {
+    const [isLogin, setIsLogin] = useState(true)
     const [email, setEmail] = useState<null | string>(null)
     const [password, setPassword] = useState<null | string>(null)
     const [error, setError] = useState('')
@@ -18,7 +19,11 @@ export default function Login() {
                 setError('Please enter email and password')
                 return
             }
-            await signInWithEmailAndPassword(auth, email, password)
+            if (isLogin) {
+                await signInWithEmailAndPassword(auth, email, password)
+            } else {
+                await createUserWithEmailAndPassword(auth, email, password)
+            }
             router.replace('/dashboard')
         } catch (error) {
             setError((error as Error).message)
@@ -45,7 +50,7 @@ export default function Login() {
                     }}
                 >
                     <Typography variant="h4" align="center" gutterBottom>
-                        Login
+                        {isLogin ? 'Login' : 'Sign Up'}
                     </Typography>
                     <TextField
                         placeholder="Email"
@@ -90,7 +95,7 @@ export default function Login() {
                         }}
                     />
                     <Button type="submit" variant="contained" color="primary" fullWidth sx={{ marginTop: '1rem' }}>
-                        Login
+                        {isLogin ? 'Login' : 'Sign Up'}
                     </Button>
                     {error && (
                         <Typography color="error" sx={{ textAlign: 'center', marginTop: '1rem' }}>
@@ -99,10 +104,16 @@ export default function Login() {
                     )}
                     {!error && <span style={{ display: 'block', marginTop: '56px' }} />}
                     <Typography variant="body2" align="center" sx={{ marginTop: '1rem', color: 'gray' }}>
-                        Don’t have an account?{' '}
-                        <Link href="/signup" color="primary" underline="hover">
-                            Sign Up
-                        </Link>
+                        {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
+                        <Button
+                            type="button"
+                            onClick={() => setIsLogin(!isLogin)}
+                            color="primary"
+                            sx={{ textTransform: 'none', fontWeight: 'bold' }}
+                            variant="text"
+                        >
+                            {isLogin ? 'Sign Up' : 'Login'}
+                        </Button>
                     </Typography>
                 </Box>
             </form>
