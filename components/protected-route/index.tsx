@@ -5,15 +5,19 @@ import { CircularProgress } from '@mui/material'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
-export default function HomePage() {
+export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
     const { user, loading } = useAuth()
     const router = useRouter()
 
     useEffect(() => {
-        if (!loading) {
-            router.replace(user ? '/dashboard' : '/login')
+        if (!loading && !user) {
+            router.replace('/login')
         }
     }, [user, loading, router])
 
-    return <CircularProgress />
+    if (loading) {
+        return <CircularProgress />
+    }
+
+    return <>{user ? children : 'Not authorized'}</>
 }
