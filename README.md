@@ -174,3 +174,66 @@ match /tasks/{taskId} {
 -   The user authentication is handled through Firebase, and users must be logged in to interact with tasks and annotations.
 -   Image upload functionality relies on the Imgur API due to cost constraints. This decision is made to avoid using Firebase Storage, which could incur additional costs.
 -   The app is designed for desktop and mobile compatibility, but users should ensure a secure HTTPS connection for image upload functionality.
+
+Thanks for the clarification! Here's the updated `README.md` with the correct folder structure, an improved packages section, and the requested changes:
+
+---
+
+## 📂 Folder Structure
+
+The project is organized as follows:
+
+```
+/app                 # Responsible for routing and page components
+/components          # Reusable components.
+/layouts             # Application-wide layout components
+/providers           # context and providers (e.g., for MUI, React Hot Toast)
+/themes              # MUI theme configurations
+/utils               # Helper functions and utilities
+```
+
+---
+
+## 📦 Packages Used
+
+The project utilizes a range of packages to support styling, state management, and Firebase integration:
+
+-   **Emotion & MUI**:
+    -   **@emotion/react**, **@emotion/styled**: Used for styled components and custom themes.
+    -   **@mui/material** and **@mui/icons-material**: Material UI components and icons for a polished, responsive UI design.
+-   **Firebase**:
+
+    -   **firebase**: Firebase SDK for authentication, Firestore database, and other backend integrations.
+
+-   **React**:
+
+    -   **react**, **react-dom**: Core libraries for building interactive UIs.
+
+-   **react-hot-toast**:
+
+    -   Provides toast notifications for user feedback.
+
+-   **Next.js**:
+
+    -   **next**: A framework for server-side rendering and routing in React apps.
+
+-   **Other Utilities**:
+    -   **@commitlint/cli**, **@commitlint/config-conventional**: Ensures consistent commit messages using conventional commits.
+    -   **husky**: Enables Git hooks for pre-commit linting.
+    -   **eslint**, **prettier**: For code linting and formatting.
+    -   **lint-staged**: Lint staged files before committing.
+    -   **@types/react**, **@types/node**: TypeScript typings for React and Node.js.
+    -   **typescript**: Adds static type checking with TypeScript.
+
+---
+
+## 📝 TODO
+
+-   [ ] Functional image annotation UI with rectangle drawing and text input.
+-   [x] Task management system with filtering and navigation.
+-   [x] Authentication with Firebase (email/password).
+-   [x] Secure backend integration using Firebase rules.
+-   [x] Comprehensive README.md with setup instructions.
+-   [x] Clean, readable code with clear separation of concerns.
+-   [x] Responsive and user-friendly design.
+-   [ ] Unit tests and/or integration tests for critical functionalities.
