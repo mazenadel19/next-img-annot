@@ -3,7 +3,7 @@ import ProtectedRoute from '@/components/protected-route'
 import { db } from '@/utils/firebase'
 import { user } from '@/utils/types'
 import { Box, Button, CircularProgress, Container, MenuItem, TextField, Typography } from '@mui/material'
-import { addDoc, collection, getDocs } from 'firebase/firestore'
+import { addDoc, arrayUnion, collection, doc, getDocs, updateDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
@@ -49,12 +49,21 @@ export default function NewTaskForm() {
                 const taskDoc = {
                     imageURL: imageURL,
                     description,
-                    assignedTo: assignedTo || null,
+                    assignedTo: assignedTo,
                     status: 'Pending',
                     annotations: [],
                 }
 
-                await addDoc(collection(db, 'tasks'), taskDoc)
+                // Save task to Firestore
+                const taskDocRef = await addDoc(collection(db, 'tasks'), taskDoc)
+
+                // Update the assigned user's tasks array
+                if (assignedTo) {
+                    const userDocRef = doc(db, 'users', assignedTo)
+                    await updateDoc(userDocRef, {
+                        tasks: arrayUnion(taskDocRef.id),
+                    })
+                }
 
                 toast.success('Task created successfully!', {
                     ariaProps: {
