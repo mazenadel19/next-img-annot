@@ -20,7 +20,7 @@ export default function ButtonAppBar() {
     async function logout() {
         try {
             await signOut(auth)
-            router.replace('/login')
+            router.replace('/auth')
         } catch (error) {
             toast.error((error as Error).message, {
                 ariaProps: {
@@ -33,7 +33,7 @@ export default function ButtonAppBar() {
 
     useEffect(() => {
         if (!loading) {
-            router.replace(user ? '/dashboard' : '/login')
+            router.replace(user ? '/dashboard' : '/auth')
         }
     }, [user, loading, router])
 
