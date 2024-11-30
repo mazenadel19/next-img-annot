@@ -115,6 +115,7 @@ export default function NewTaskForm() {
                     component="form"
                     onSubmit={handleSubmit}
                     sx={{
+                        width: '100%',
                         maxWidth: 400,
                         mx: 'auto',
                         p: 3,
