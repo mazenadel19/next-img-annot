@@ -236,4 +236,4 @@ The project utilizes a range of packages to support styling, state management, a
 -   [x] Comprehensive README.md with setup instructions.
 -   [x] Clean, readable code with clear separation of concerns.
 -   [x] Responsive and user-friendly design.
--   [ ] Unit tests and/or integration tests for critical functionalities.
+-   [ ] ~~Unit tests and/or integration tests for critical functionalities.~~
