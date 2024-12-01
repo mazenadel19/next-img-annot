@@ -148,7 +148,7 @@ The following rules are applied to ensure proper access control for the app:
 ```javascript
 match /users/{userId} {
     allow read: if request.auth != null; // Only authenticated users can read their own data
-    allow write: if request.auth != null && request.auth.uid == userId; // Only users can write their own data
+    allow write: if request.auth != null  // Authenticated user can write  other users data
 }
 ```
 
@@ -171,6 +171,7 @@ match /tasks/{taskId} {
 
 ## 📋 Assumptions
 
+-   Authenticated user have write privilege to each other which could be a security breach, it was implemented to handle the scenario with when user assign tasks to other users, in real world application this should be handled differently
 -   The user authentication is handled through Firebase, and users must be logged in to interact with tasks and annotations.
 -   Image upload functionality relies on the Imgur API due to cost constraints. This decision is made to avoid using Firebase Storage, which could incur additional costs.
 -   The app is designed for desktop and mobile compatibility, but users should ensure a secure HTTPS connection for image upload functionality.
