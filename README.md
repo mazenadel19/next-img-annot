@@ -16,7 +16,7 @@ This is a task management app that enables users to create, assign, and manage t
 
 ## 🌐 Live Demo
 
-Access the production site: [next-fsbuilder.vercel.app](https://next-fsbuilder.vercel.app)
+Access the production site: [next-img-annot.vercel.app](https://next-img-annot.vercel.app)
 
 ---
 
